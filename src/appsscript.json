@@ -1,0 +1,39 @@
+{
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/gmail.addons.execute",
+    "https://www.googleapis.com/auth/gmail.addons.current.message.metadata",
+    "https://www.googleapis.com/auth/gmail.addons.current.message.readonly",
+    "https://www.googleapis.com/auth/script.external_request",
+    "https://www.googleapis.com/auth/userinfo.email"
+  ],
+  "urlFetchWhitelist": [
+    "https://www.conrep.com/",
+    "https://email.conrep.com/",
+    "https://gbl.conrep.com/",
+    "https://enjnkzdxygkmi.x.pipedream.net/"
+  ],
+  "gmail": {
+    "name": "Conrep",
+    "logoUrl": "https://gbl.conrep.com/office365/Images/conrep-logo.png",
+    "contextualTriggers": [{
+      "unconditional": {
+      },
+      "onTriggerFunction": "buildAddOn"
+    }],
+    "universalActions":[
+      {
+        "text": "Settings",
+        "runFunction": "showSettings"
+      },
+      {
+        "text": "Sync Calendar",
+        "runFunction": "syncCalendar"
+      }
+    ],
+    "openLinkUrlPrefixes": [
+      "https://mail.google.com/"
+    ],
+    "primaryColor": "#4285F4",
+    "secondaryColor": "#4285F4"
+  }
+}
