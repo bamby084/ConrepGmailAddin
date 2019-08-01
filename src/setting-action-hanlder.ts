@@ -1,6 +1,6 @@
 import {SettingService} from './setting-service';
 import {Settings} from './setting';
-import {ApiHandler} from './api-hanlder';
+import {ApiHandler} from './api-handler';
 
 function showSettings(event){
     return CardService.newUniversalActionResponseBuilder()

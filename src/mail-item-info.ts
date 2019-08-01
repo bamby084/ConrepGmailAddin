@@ -1,7 +1,7 @@
 export class MailItemInfo
 {
     public MailItemId: string = '';
-    public Headers: string;
+    public Headers: Array<any>;
     public HtmlBody: string = '';
     public From: string = '';
     public To: string = '';

@@ -2,9 +2,10 @@ import { Settings } from "./setting";
 import {ApiInvokeMode, RequestMethod} from "./enum";
 import {SettingService} from "./setting-service";
 import { MailItemInfo } from "./mail-item-info";
+import {EmailHeader} from "./email-header";
 
 export class ApiHandler{
-
+	
 	public getConrepSettings(settings: Settings): Settings
 	{
         var url:string = this.ensureHttps(settings.host) 
@@ -46,7 +47,16 @@ export class ApiHandler{
 		mailInfo.CC = mail.getCc();
 		mailInfo.BCC = mail.getBcc();
 		mailInfo.Subject = mail.getSubject();
-		mailInfo.Headers = this.parseMailHeaders(mail.getRawContent());
+		
+		var headers = this.parseMailHeaders(mail.getRawContent());
+		var jsonHeaders = headers.map(header => {
+			var result = {};
+			result[header.Key] = header.Value;
+
+			return result;
+		});
+
+		mailInfo.Headers = jsonHeaders;
 		payload.MailItems.push(mailInfo);
 
 		var options = {
@@ -55,9 +65,12 @@ export class ApiHandler{
 		 	payload: JSON.stringify(payload)
 		 };
 		
+		Logger.log(JSON.stringify(payload));
+
 		var content = UrlFetchApp.fetch(url, options).getContentText();
+		Logger.log(content);
 		var settings = this.parseXmlSettings(content);
-		Logger.log(settings);
+		//Logger.log(settings);
 	}
 
     private ensureHttps(url: string): string
@@ -119,8 +132,34 @@ export class ApiHandler{
 		return '';
 	}
 
-	private parseMailHeaders(content: string)
+	private parseMailHeaders(content: string): Array<EmailHeader>
 	{
+		var regex = /^([-A-Za-z0-9]+)(:[ \t]*)(.*)/;
 		var headersPart: string = content.split(/(\r\n){2,}/g)[0];
+		
+		var lines = headersPart.split(/\r\n/);
+		var header: EmailHeader;
+		var headers: Array<EmailHeader> = [];
+
+		lines.forEach(function(line){
+			var match = line.match(regex);
+			if(match)
+			{
+				header = new EmailHeader();
+				header.Key = match[1];
+				header.Value = match[3];
+
+				headers.push(header);
+			}
+			else
+			{
+				if(header)
+				{
+					header.Value += '\r\n' + line;
+				}
+			}
+		});
+
+		return headers;
 	}
 }
