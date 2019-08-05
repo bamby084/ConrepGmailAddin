@@ -49,6 +49,11 @@ export class EmailImporter
         apiMode: ApiInvokeMode)
     {
         var apiHandler = new ApiHandler();
-        apiHandler.validateEmail(mail, requestMethod, apiMode);
+        var validateResult = apiHandler.validateEmail(mail, requestMethod, apiMode);
+
+        if(validateResult == null)
+        {
+            
+        }
     }
 }

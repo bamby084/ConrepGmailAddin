@@ -19,58 +19,67 @@ export class ApiHandler{
 		return this.parseXmlSettings(content);
     }
 
-	public validateEmail(mail: GoogleAppsScript.Gmail.GmailMessage, requestMethod: RequestMethod, apiMode: ApiInvokeMode)
+	public validateEmail(mail: GoogleAppsScript.Gmail.GmailMessage, 
+		requestMethod: RequestMethod, apiMode: ApiInvokeMode): Settings
 	{
-		var settingService = new SettingService();
-		var settings = settingService.getSettings();
-		var userEmailAddress = Session.getEffectiveUser().getEmail();
-		settings.host = "https://enjnkzdxygkmi.x.pipedream.net/";
-		var url: string = this.ensureHttps(settings.host)
-			+ "/conrep/outlook/web/email_requests.php?RequestMethod=ValidateUserEmail"
-			+ "&UserName=" + encodeURIComponent(settings.user)
-			+ "&Password=" + encodeURIComponent(settings.password)
-			+ "&CompanyId=" + settings.companyId
-			+ "&Mode=" + apiMode
-			+ "&EmailType=" + requestMethod
-			+ "&From=" + encodeURIComponent(mail.getFrom())
-			+ "&MailId=" + encodeURIComponent(mail.getHeader("Message-ID").replace("<","").replace(">",""))
-			+ "&OutlookAccount=" + encodeURIComponent(userEmailAddress)
-			+ "&MAC=" + this.getMACAddress();
+		try
+		{
+			var settingService = new SettingService();
+			var settings = settingService.getSettings();
+			var userEmailAddress = Session.getEffectiveUser().getEmail();
 
-		var payload = {
-			MailItems: Array<MailItemInfo>()
-		};
+			//just for testing: requestbin.com
+			//settings.host = "https://enjnkzdxygkmi.x.pipedream.net/";
 
-		var mailInfo = new MailItemInfo();
-		mailInfo.From = mail.getFrom();
-		mailInfo.To = mail.getTo();
-		mailInfo.CC = mail.getCc();
-		mailInfo.BCC = mail.getBcc();
-		mailInfo.Subject = mail.getSubject();
-		
-		var headers = this.parseMailHeaders(mail.getRawContent());
-		var jsonHeaders = headers.map(header => {
-			var result = {};
-			result[header.Key] = header.Value;
+			var url: string = this.ensureHttps(settings.host)
+				+ "/conrep/outlook/web/email_requests.php?RequestMethod=ValidateUserEmail"
+				+ "&UserName=" + encodeURIComponent(settings.user)
+				+ "&Password=" + encodeURIComponent(settings.password)
+				+ "&CompanyId=" + settings.companyId
+				+ "&Mode=" + apiMode
+				+ "&EmailType=" + requestMethod
+				+ "&From=" + encodeURIComponent(mail.getFrom())
+				+ "&MailId=" + encodeURIComponent(mail.getHeader("Message-ID").replace("<","").replace(">",""))
+				+ "&OutlookAccount=" + encodeURIComponent(userEmailAddress)
+				+ "&MAC=" + this.getMACAddress();
 
-			return result;
-		});
+			var payload = {
+				MailItems: Array<MailItemInfo>()
+			};
 
-		mailInfo.Headers = jsonHeaders;
-		payload.MailItems.push(mailInfo);
+			var mailInfo = new MailItemInfo();
+			mailInfo.From = mail.getFrom();
+			mailInfo.To = mail.getTo();
+			mailInfo.CC = mail.getCc();
+			mailInfo.BCC = mail.getBcc();
+			mailInfo.Subject = mail.getSubject();
+			
+			var headers = this.parseMailHeaders(mail.getRawContent());
+			var jsonHeaders = headers.map(header => {
+				var result = {};
+				result[header.Key] = header.Value;
 
-		var options = {
-		 	method: "POST",
-		 	contentType: "application/json",
-		 	payload: JSON.stringify(payload)
-		 };
-		
-		Logger.log(JSON.stringify(payload));
+				return result;
+			});
 
-		var content = UrlFetchApp.fetch(url, options).getContentText();
-		Logger.log(content);
-		var settings = this.parseXmlSettings(content);
-		//Logger.log(settings);
+			mailInfo.Headers = jsonHeaders;
+			payload.MailItems.push(mailInfo);
+
+			var options = {
+				method: "POST",
+				contentType: "application/json",
+				payload: JSON.stringify(payload)
+			};
+			
+			var content = UrlFetchApp.fetch(url, options).getContentText();
+			var settings = this.parseXmlSettings(content);
+
+			return settings;
+		}
+		catch(exception)
+		{
+			return null;
+		}
 	}
 
     private ensureHttps(url: string): string
