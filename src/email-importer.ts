@@ -1,6 +1,7 @@
 import {SettingService} from './setting-service';
 import { RequestMethod, ApiInvokeMode } from './enum';
 import { ApiHandler } from './api-handler';
+import {NotificationService} from './notification-service';
 
 export class EmailImporter
 {
@@ -49,11 +50,12 @@ export class EmailImporter
         apiMode: ApiInvokeMode)
     {
         var apiHandler = new ApiHandler();
-        var validateResult = apiHandler.validateEmail(mail, requestMethod, apiMode);
+        var validateResult = null; // apiHandler.validateEmail(mail, requestMethod, apiMode);
 
         if(validateResult == null)
         {
-            
+           var notificationService = new NotificationService();
+           return notificationService.Notify("Can not validate user");
         }
     }
 }

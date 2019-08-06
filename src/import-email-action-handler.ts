@@ -8,5 +8,5 @@ function importEmailManually(e)
     var message = GmailApp.getMessageById(e.messageMetadata.messageId);
 
     var emailImporter = new EmailImporter();
-    emailImporter.ImportEmail(message, param.requestMethod, param.apiMode);
+    return emailImporter.ImportEmail(message, param.requestMethod, param.apiMode);
 }
