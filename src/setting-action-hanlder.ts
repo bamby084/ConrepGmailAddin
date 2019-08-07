@@ -1,6 +1,7 @@
 import {SettingService} from './setting-service';
 import {Settings} from './setting';
 import {ApiHandler} from './api-handler';
+import {NotificationService} from "./notification-service";
 
 function showSettings(event){
     return CardService.newUniversalActionResponseBuilder()
@@ -44,17 +45,13 @@ function onUpdateSettings(e){
     var userSettings = getInputSettings(e.formInput);
     var apiHanler = new ApiHandler();
     
-    var settings = apiHanler.getConrepSettings(userSettings);
-    if(settings == null)
+    var result = apiHanler.getConrepSettings(userSettings);
+    if(!result.success)
     {
-        var notification = CardService.newNotification()
-            .setText("Cannot get settings from the server. Please make sure your login url, username, password or company id is correct.");
-            
-        return CardService.newActionResponseBuilder()
-            .setNotification(notification)
-            .build();
+        return NotificationService.notify(result.message);
     }
 
+    var settings  = result.data;
     settings.user = userSettings.user;
     settings.host = userSettings.host;
     settings.companyId = userSettings.companyId;

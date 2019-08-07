@@ -1,7 +1,7 @@
 
 export class NotificationService
 {
-    public Notify(message: string)
+    public static notify(message: string)
     {
         var notification = CardService.newNotification()
         .setText(message);

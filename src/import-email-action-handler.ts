@@ -1,4 +1,5 @@
 import { EmailImporter } from "./email-importer";
+import {NotificationService} from './notification-service';
 
 function importEmailManually(e)
 {
@@ -8,5 +9,14 @@ function importEmailManually(e)
     var message = GmailApp.getMessageById(e.messageMetadata.messageId);
 
     var emailImporter = new EmailImporter();
-    return emailImporter.ImportEmail(message, param.requestMethod, param.apiMode);
+    var result = emailImporter.importEmail(message, param.requestMethod, param.apiMode);
+
+    if(result.success == false)
+    {
+        return NotificationService.notify(`Import failed: ${result.message}`);
+    }
+    else
+    {
+        return NotificationService.notify("Import completed.");
+    }
 }

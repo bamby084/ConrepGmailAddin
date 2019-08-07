@@ -1,14 +1,15 @@
 import {SettingService} from './setting-service';
 import { RequestMethod, ApiInvokeMode } from './enum';
 import { ApiHandler } from './api-handler';
-import {NotificationService} from './notification-service';
+import { ApiResult } from './api-result';
+import { ImportSetting } from './import-setting';
 
 export class EmailImporter
 {
     private readonly PANEL_HEADER: string = "Email account associated with this email is not listed in your settings, to import email contents. Click button below to process the email contents." 
     private readonly PANEL_FOOTER: string = "You can close this pane if you do not want to see this message.";
 
-    public CheckAndImportEmail(mail: GoogleAppsScript.Gmail.GmailMessage)
+    public checkAndImportEmail(mail: GoogleAppsScript.Gmail.GmailMessage)
     {
         var userEmailAddress = Session.getEffectiveUser().getEmail();
         var settingService = new SettingService();
@@ -18,7 +19,7 @@ export class EmailImporter
 
         if(settings.emails.indexOf(userEmailAddress) > -1)
         {
-            this.ImportEmail(mail, requestMethod, ApiInvokeMode.RightPane);
+            this.importEmail(mail, requestMethod, ApiInvokeMode.RightPane);
         }
         else
         {
@@ -45,17 +46,39 @@ export class EmailImporter
         }
     }
 
-    public ImportEmail(mail: GoogleAppsScript.Gmail.GmailMessage, 
+    public importEmail(mail: GoogleAppsScript.Gmail.GmailMessage, 
         requestMethod: RequestMethod,
-        apiMode: ApiInvokeMode)
+        apiMode: ApiInvokeMode): ApiResult
     {
         var apiHandler = new ApiHandler();
-        var validateResult = null; // apiHandler.validateEmail(mail, requestMethod, apiMode);
+        var validateResult = apiHandler.validateEmail(mail, requestMethod, apiMode);
+        
+        if(validateResult.success == false)
+            return ApiResult.failure(validateResult.message);
 
-        if(validateResult == null)
+        if(validateResult.data.sendData)
         {
-           var notificationService = new NotificationService();
-           return notificationService.Notify("Can not validate user");
+            var importSetting = new ImportSetting();
+            importSetting.mailItem = mail;
+            importSetting.sendHeaderOnly = false;
+            importSetting.sendAttachments = validateResult.data.sendAttachments;
+            importSetting.maxAttachmentSize = validateResult.data.maxAttachmentSize;
+
+            var importSettings = new Array<ImportSetting>();
+            importSettings.push(importSetting);
+
+            apiHandler.importEmails(importSettings, validateResult.data.transToken, requestMethod, apiMode);
         }
+
+        if(apiMode == ApiInvokeMode.RightPane)
+        {
+            this.showEmailDetails();
+        }
+
+        return ApiResult.success();
+    }
+
+    public showEmailDetails(){
+
     }
 }

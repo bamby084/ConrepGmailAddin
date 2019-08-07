@@ -1,10 +1,10 @@
 export class EmailHeader{
-    public Key: string;
-    public Value: string;
+    public key: string;
+    public value: string;
 
     public toJsonObject(){
         var result = {};
-        result[this.Key] = this.Value;
+        result[this.key] = this.value;
 
         return result;
     }

@@ -10,7 +10,7 @@ function buildAddOn(event){
     var message = GmailApp.getMessageById(messageId);
 
     var mailImporter = new EmailImporter();
-    var resultCard = mailImporter.CheckAndImportEmail(message);
+    var resultCard = mailImporter.checkAndImportEmail(message);
     
     return [resultCard];
 }

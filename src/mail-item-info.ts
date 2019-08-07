@@ -1,11 +1,11 @@
 export class MailItemInfo
 {
-    public MailItemId: string = '';
-    public Headers: Array<any>;
-    public HtmlBody: string = '';
-    public From: string = '';
-    public To: string = '';
-    public CC: string = '';
-    public BCC: string = '';
-    public Subject: string = '';
+    public mailItemId: string = '';
+    public headers: Array<any>;
+    public htmlBody: string = '';
+    public from: string = '';
+    public to: string = '';
+    public cc: string = '';
+    public bcc: string = '';
+    public subject: string = '';
 }
