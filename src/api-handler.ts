@@ -5,6 +5,7 @@ import { MailItemInfo } from "./mail-item-info";
 import {EmailHeader} from "./email-header";
 import {ApiResult} from "./api-result";
 import {ImportSetting} from "./import-setting";
+import {HttpStatusCode} from "./enum";
 
 export class ApiHandler{
 	
@@ -29,9 +30,6 @@ export class ApiHandler{
 			var settingService = new SettingService();
 			var settings = settingService.getSettings();
 			var userEmailAddress = Session.getEffectiveUser().getEmail();
-
-			//just for testing: requestbin.com
-			//settings.host = "https://enjnkzdxygkmi.x.pipedream.net/";
 
 			var url: string = this.ensureHttps(settings.host)
 				+ "/conrep/outlook/web/email_requests.php?RequestMethod=ValidateUserEmail"
@@ -75,7 +73,7 @@ export class ApiHandler{
 	}
 
 	public importEmails(importSettings: Array<ImportSetting>, token: string,
-		  requestMethod: RequestMethod, apiMode: ApiInvokeMode)
+		  requestMethod: RequestMethod, apiMode: ApiInvokeMode): boolean
 	{
 		var settingService = new SettingService();
 		var settings = settingService.getSettings();
@@ -87,23 +85,55 @@ export class ApiHandler{
 			`&Mode=${apiMode}`;
 		
 		var emails: Array<MailItemInfo> = new Array<MailItemInfo>();
-		var form:FormData = new FormData();
+		var formData: any = {};		
 
-		importSettings.forEach(function(importSetting){
+		importSettings.forEach(function(importSetting: ImportSetting){
 			var mailItemInfo = new MailItemInfo();
 			mailItemInfo.mailItemId = this.getMailId(importSetting.mailItem);
 			mailItemInfo.headers = this.getMailHeaders(importSetting.mailItem);
 
 			if(importSetting.sendHeaderOnly == false)
 			{
-
+				mailItemInfo.htmlBody = importSetting.mailItem.getBody();
+				if(importSetting.sendAttachments)
+				{
+					var attachments = importSetting.mailItem.getAttachments();
+					attachments.forEach( attachment => {
+						var name = attachment.getName();
+						var fileName = `${name}::${mailItemInfo.mailItemId}`;
+						
+						if(attachment.getSize() < importSetting.maxAttachmentSize)
+						{
+							formData[name] = Utilities.newBlob(attachment.getBytes(), 
+								attachment.getContentType(), fileName);
+						}
+					});
+				}
 			}
 
 			emails.push(mailItemInfo);
-		});
+		}.bind(this));
 		
-		form.append("emails", JSON.stringify(emails));
-		this.postData(url, form);
+		var emailsBlob = Utilities.newBlob(JSON.stringify({ mailItems: emails}), "application/json");
+		formData.emails = emailsBlob;
+		
+		var options = {
+			method: "POST",
+			payload: formData
+		};
+
+		var statusCode = UrlFetchApp.fetch(url, options).getResponseCode();
+		return statusCode == HttpStatusCode.Ok;
+	}
+
+	public showEmailDetails(mail: GoogleAppsScript.Gmail.GmailMessage, 
+		token: string, requestMethod: RequestMethod, baseUrl: string)
+	{
+		var url: string = this.ensureHttps(baseUrl)
+			+ "/conrep/outlook/web/email_details.php?"
+			+ `MessageId=${encodeURIComponent(this.getMailId(mail))}`
+			+ `"&TransToken=${encodeURIComponent(token)}`
+			+  `&EmailType=${requestMethod}`;
 	}
 
     private ensureHttps(url: string): string
@@ -132,7 +162,7 @@ export class ApiHandler{
 			settings.transToken = root.getChildText("TransToken");
 			settings.sendData = this.parseBool(root.getChildText("SendData"));
 			settings.sendAttachments = this.parseBool(root.getChildText("SendAttachments"));
-			settings.maxAttachmentSize = parseInt(root.getChildText("MaxAttachmentSize"));
+			settings.maxAttachmentSize = parseInt(root.getChildText("MaxAttachmentSize"))*1024*1024;
 			settings.postUrl = root.getChildText("PostUrl");
 			settings.calendarSynchronizationInterval = parseInt(root.getChildText("CalendarSyncInterval"));
 			settings.logIncomingEmails = this.parseBool(root.getChildText("LogIncomingEmails"));
@@ -215,44 +245,5 @@ export class ApiHandler{
 		});
 
 		return jsonHeaders;
-	}
-
-	private postData(url: string, formData: FormData)
-	{
-		var request = new XMLHttpRequest();
-		//request.onreadystatechange = function(){
-		// 		if(this.readyState == 4)
-		// 		{
-		// 			if(this.status == 200)
-		// 			{
-		// 				resolve(this.responseText);
-		// 			}
-		// 			else
-		// 			{	
-		// 				reject(this.statusText);
-		// 			}
-		// 		} 
-		// 	}
-		request.open("POST", url);
-		request.send(formData);
-
-		// return new Promise(function(resolve, reject){
-		// 	var request = new XMLHttpRequest();
-		// 	request.onreadystatechange = function(){
-		// 		if(this.readyState == 4)
-		// 		{
-		// 			if(this.status == 200)
-		// 			{
-		// 				resolve(this.responseText);
-		// 			}
-		// 			else
-		// 			{	
-		// 				reject(this.statusText);
-		// 			}
-		// 		} 
-		// 	}
-		// 	request.open("POST", url);
-		// 	request.send(formData);
-		// });
 	}
 }

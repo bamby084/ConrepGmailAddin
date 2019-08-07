@@ -50,6 +50,9 @@ export class EmailImporter
         requestMethod: RequestMethod,
         apiMode: ApiInvokeMode): ApiResult
     {
+        var settingService = new SettingService();
+        var settings = settingService.getSettings();
+
         var apiHandler = new ApiHandler();
         var validateResult = apiHandler.validateEmail(mail, requestMethod, apiMode);
         
@@ -72,13 +75,13 @@ export class EmailImporter
 
         if(apiMode == ApiInvokeMode.RightPane)
         {
-            this.showEmailDetails();
+            var baseUrl: string = settings.host;
+            if(validateResult.data.postUrl)
+                baseUrl = validateResult.data.postUrl;
+            
+            apiHandler.showEmailDetails(mail, validateResult.data.transToken, requestMethod, baseUrl);
         }
 
         return ApiResult.success();
-    }
-
-    public showEmailDetails(){
-
     }
 }
