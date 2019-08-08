@@ -126,17 +126,7 @@ export class ApiHandler{
 		return statusCode == HttpStatusCode.Ok;
 	}
 
-	public showEmailDetails(mail: GoogleAppsScript.Gmail.GmailMessage, 
-		token: string, requestMethod: RequestMethod, baseUrl: string)
-	{
-		var url: string = this.ensureHttps(baseUrl)
-			+ "/conrep/outlook/web/email_details.php?"
-			+ `MessageId=${encodeURIComponent(this.getMailId(mail))}`
-			+ `"&TransToken=${encodeURIComponent(token)}`
-			+  `&EmailType=${requestMethod}`;
-	}
-
-    private ensureHttps(url: string): string
+    public ensureHttps(url: string): string
     {
         if(url.indexOf("http://") == 0 || url.indexOf("https://") == 0)
             return url;
@@ -229,7 +219,7 @@ export class ApiHandler{
 		return headers;
 	}
 
-	private getMailId(mail: GoogleAppsScript.Gmail.GmailMessage)
+	public getMailId(mail: GoogleAppsScript.Gmail.GmailMessage)
 	{
 		return mail.getHeader("Message-ID").replace("<","").replace(">","");
 	}

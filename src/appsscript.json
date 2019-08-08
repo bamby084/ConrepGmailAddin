@@ -31,7 +31,8 @@
       }
     ],
     "openLinkUrlPrefixes": [
-      "https://mail.google.com/"
+      "https://mail.google.com/",
+      "https://gbl.conrep.com/"
     ],
     "primaryColor": "#4285F4",
     "secondaryColor": "#4285F4"

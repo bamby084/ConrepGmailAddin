@@ -6,7 +6,7 @@ export class ApiResult
     public message: string;
     public data: Settings;
 
-    public static success(data: Settings = null): ApiResult
+    public static success(data:Settings = null): ApiResult
     {
         var result = new ApiResult();
         result.success = true;

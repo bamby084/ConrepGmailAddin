@@ -3,8 +3,10 @@ import {Settings} from './setting';
 import {ApiHandler} from './api-handler';
 import {NotificationService} from "./notification-service";
 import {SettingPageBuilder} from "./setting-page";
+import ActionResponse = GoogleAppsScript.Card_Service.ActionResponse;
 
-function onSaveSettings(e){    
+function onSaveSettings(e): ActionResponse
+{    
     var settingService = new SettingService();
     var settings = settingService.getCachedSettings();
     var userSettings = getInputSettings(e.formInput);
@@ -27,7 +29,7 @@ function onSaveSettings(e){
         .build();
 }
 
-function onCancel(e)
+function onCancel(e): ActionResponse
 {
     var navigation = CardService.newNavigation().popToRoot();
 
@@ -36,7 +38,8 @@ function onCancel(e)
         .build();
 }
 
-function onUpdateSettings(e){
+function onUpdateSettings(e): ActionResponse
+{
     var userSettings = getInputSettings(e.formInput);
     var apiHanler = new ApiHandler();
     

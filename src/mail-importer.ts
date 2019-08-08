@@ -34,15 +34,6 @@ export class MailImporter
             apiHandler.importEmails(importSettings, validateResult.data.transToken, requestMethod, apiMode);
         }
 
-        if(apiMode == ApiInvokeMode.RightPane)
-        {
-            var baseUrl: string = settings.host;
-            if(validateResult.data.postUrl)
-                baseUrl = validateResult.data.postUrl;
-            
-            apiHandler.showEmailDetails(mail, validateResult.data.transToken, requestMethod, baseUrl);
-        }
-
-        return ApiResult.success();
+        return ApiResult.success(validateResult.data);
     } 
 }
