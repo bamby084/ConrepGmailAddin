@@ -1,5 +1,5 @@
-import { EmailImporter } from "./email-importer";
 import {NotificationService} from './notification-service';
+import {MailImporter} from "./mail-importer";
 
 function importEmailManually(e)
 {
@@ -8,8 +8,8 @@ function importEmailManually(e)
     GmailApp.setCurrentMessageAccessToken(accessToken);
     var message = GmailApp.getMessageById(e.messageMetadata.messageId);
 
-    var emailImporter = new EmailImporter();
-    var result = emailImporter.importEmail(message, param.requestMethod, param.apiMode);
+    var mailImporter = new MailImporter();
+    var result = mailImporter.importEmail(message, param.requestMethod, param.apiMode);
 
     if(result.success == false)
     {

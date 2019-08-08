@@ -1,4 +1,4 @@
-export class EmailHeader{
+export class MailHeader{
     public key: string;
     public value: string;
 

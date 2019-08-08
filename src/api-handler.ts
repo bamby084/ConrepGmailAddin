@@ -2,7 +2,7 @@ import { Settings } from "./setting";
 import {ApiInvokeMode, RequestMethod} from "./enum";
 import {SettingService} from "./setting-service";
 import { MailItemInfo } from "./mail-item-info";
-import {EmailHeader} from "./email-header";
+import {MailHeader} from "./mail-header";
 import {ApiResult} from "./api-result";
 import {ImportSetting} from "./import-setting";
 import {HttpStatusCode} from "./enum";
@@ -198,20 +198,20 @@ export class ApiHandler{
 		return '';
 	}
 
-	private parseMailHeaders(content: string): Array<EmailHeader>
+	private parseMailHeaders(content: string): Array<MailHeader>
 	{
 		var regex = /^([-A-Za-z0-9]+)(:[ \t]*)(.*)/;
 		var headersPart: string = content.split(/(\r\n){2,}/g)[0];
 		
 		var lines = headersPart.split(/\r\n/);
-		var header: EmailHeader;
-		var headers: Array<EmailHeader> = [];
+		var header: MailHeader;
+		var headers: Array<MailHeader> = [];
 
 		lines.forEach(function(line){
 			var match = line.match(regex);
 			if(match)
 			{
-				header = new EmailHeader();
+				header = new MailHeader();
 				header.key = match[1];
 				header.value = match[3];
 

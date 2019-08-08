@@ -2,12 +2,7 @@ import {SettingService} from './setting-service';
 import {Settings} from './setting';
 import {ApiHandler} from './api-handler';
 import {NotificationService} from "./notification-service";
-
-function showSettings(event){
-    return CardService.newUniversalActionResponseBuilder()
-         .displayAddOnCards([createSettingCard()])
-         .build();
-}
+import {SettingPageBuilder} from "./setting-page";
 
 function onSaveSettings(e){    
     var settingService = new SettingService();
@@ -59,8 +54,9 @@ function onUpdateSettings(e){
 
     var settingService = new SettingService();
     settingService.setCachedSettings(settings);
-    
-    var card = settingService.buildCard(settings);
+    var settingPageBuilder = new SettingPageBuilder();
+
+    var card = settingPageBuilder.buildCard(settings);
     var navigation = CardService.newNavigation().updateCard(card);
     var notification = CardService.newNotification()
         .setText(settings.successMessage?settings.successMessage:"Settings updated successfully!");
@@ -69,14 +65,6 @@ function onUpdateSettings(e){
         .setNavigation(navigation)
         .setNotification(notification)
         .build();
-}
-
-function createSettingCard(){
-    var settingService = new SettingService();
-    var settings = settingService.getSettings();
-    settingService.setCachedSettings(settings);
-
-    return settingService.buildCard(settings);
 }
 
 function getInputSettings(formData): Settings
